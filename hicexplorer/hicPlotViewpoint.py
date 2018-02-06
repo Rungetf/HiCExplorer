@@ -37,7 +37,7 @@ def parse_arguments(args=None):
                         help='Optional parameter: Only show results for this chromosome.')
 
     parser.add_argument('--interactionOutFileName', '-i', help='Optional parameter:  If set a bedgraph file with all interaction'
-                        ' will be created.',
+                        ' will be created. The defined name is used as a prefix',
                         required=False)
 
     parser.add_argument('--dpi',
@@ -56,7 +56,7 @@ def relabelTicks(pTick):
     return xlabels
 
 
-def getViewpointValues(pMatrix, pReferencePoint, pChromViewpoint, pRegion_start, pRegion_end, pRegion, pInteractionList=None, pChromosome=None):
+def getViewpointValues(pMatrix, pReferencePoint, pChromViewpoint, pRegion_start, pRegion_end, pInteractionList=None, pChromosome=None):
 
     hic = hm.hiCMatrix(pMatrix)
     if pChromosome is not None:
@@ -114,16 +114,26 @@ def main(args=None):
         args.referencePoint = args.referencePoint.replace("-", ":")
     referencePoint = args.referencePoint.split(":")
 
+    data_list = []
+    interactions_list = None
+    if args.interactionOutFileName is not None:
+        interactions_list = []
+    matrix_name_legend = []
     for matrix in args.matrix:
-        view_point_start, view_point_end, view_point_range, data_list, interactions_list = getViewpointValues(matrix, referencePoint, chrom, region_start, region_end, args.interactionOutFileName, args.chromosome)
+        view_point_start, view_point_end, view_point_range, data_list_, interactions_list_ \
+            = getViewpointValues(matrix, referencePoint, chrom, region_start, region_end, args.interactionOutFileName, args.chromosome)
+        data_list.append(data_list_)
+        if args.interactionOutFileName is not None:
+            interactions_list.append(interactions_list_)
+        matrix_name_legend.append(os.path.basename(matrix))
 
     fig = plt.figure(figsize=(6.4, 4.8))
     ax = plt.subplot(111)
-    ax.plot(range(len(data_list)), data_list)
+    matrices_plot_legend = []
+    for i, data in enumerate(data_list):
+        matrices_plot_legend.append(ax.plot(range(len(data)), data, alpha=0.7, label=matrix_name_legend[i])[0])
     if len(referencePoint) == 2:
         log.debug("Single reference point mode: {}".format(referencePoint))
-        if interactions_list is not None:
-            log.debug("length interactions_list {}".format(len(interactions_list)))
         log.debug("label 0: {}".format((int(referencePoint[1]) - region_start) * (-1)))
         log.debug("referencePoint[1]: {}".format(referencePoint[1]))
         log.debug("region_start: {}".format(region_start))
@@ -149,19 +159,17 @@ def main(args=None):
 
     ax.set_xticklabels(xticklabels)
     ax.set_ylabel('Number of interactions')
-    left, width = .45, .5
-    bottom, height = .25, .7
-    right = left + width
-    top = bottom + height
-    ax.text(right, top, os.path.basename(args.matrix[0]),
-            verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes,
-            color='black', fontsize=8)
+    # left, width = .45, .5
+    # bottom, height = .25, .7
+    # right = left + width
+    # top = bottom + height
+
+    plt.legend(handles=matrices_plot_legend)
     plt.savefig(args.outFileName, dpi=args.dpi)
     plt.close(fig)
 
     if interactions_list is not None:
-        with open(args.interactionOutFileName, 'w') as fh:
-            for interaction in interactions_list:
-                # interaction = toString(interaction)
-                fh.write("{}\t{}\t{}\t{}\t{}\t{}\t{:.12f}\n".format(toString(interaction[0]), toString(interaction[1]), toString(interaction[2]), toString(interaction[3]), toString(interaction[4]), toString(interaction[5]), float(interaction[6])))
+        for i, interactions_list_ in enumerate(interactions_list):
+            with open(args.interactionOutFileName + '_' + matrix_name_legend[i] + '.bedgraph', 'w') as fh:
+                for interaction in interactions_list_:
+                    fh.write("{}\t{}\t{}\t{}\t{}\t{}\t{:.12f}\n".format(toString(interaction[0]), toString(interaction[1]), toString(interaction[2]), toString(interaction[3]), toString(interaction[4]), toString(interaction[5]), float(interaction[6])))
