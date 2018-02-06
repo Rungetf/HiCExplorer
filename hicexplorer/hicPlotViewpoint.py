@@ -18,7 +18,8 @@ def parse_arguments(args=None):
 
     parser.add_argument('--matrix', '-m',
                         help='path of the Hi-C matrices to plot',
-                        required=True)
+                        required=True,
+                        nargs='+')
 
     parser.add_argument('--region',
                         help='The format is chr:start-end ',
@@ -55,12 +56,42 @@ def relabelTicks(pTick):
     return xlabels
 
 
+def getViewpointValues(pMatrix, pReferencePoint, pChromViewpoint, pRegion_start, pRegion_end, pRegion, pInteractionList=None, pChromosome=None):
+
+    hic = hm.hiCMatrix(pMatrix)
+    if pChromosome is not None:
+        hic.keepOnlyTheseChr(pChromosome)
+
+    if len(pReferencePoint) == 2:
+        view_point_start, view_point_end = hic.getRegionBinRange(pReferencePoint[0], int(pReferencePoint[1]), int(pReferencePoint[1]))
+    elif len(pReferencePoint) == 3:
+        view_point_start, view_point_end = hic.getRegionBinRange(pReferencePoint[0], int(pReferencePoint[1]), int(pReferencePoint[2]))
+    else:
+        log.error("No valid reference point given. {}".format(pReferencePoint))
+        exit(1)
+
+    view_point_range = hic.getRegionBinRange(pChromViewpoint, pRegion_start, pRegion_end)
+    elements_of_viewpoint = view_point_range[1] - view_point_range[0]
+    data_list = np.zeros(elements_of_viewpoint)
+    view_point_start_ = view_point_start
+    interactions_list = None
+    if pInteractionList is not None:
+        interactions_list = []
+    while view_point_start_ <= view_point_end:
+        chrom, start, end, _ = hic.getBinPos(view_point_start_)
+        for j, idx in zip(range(elements_of_viewpoint), range(view_point_range[0], view_point_range[1], 1)):
+            data_list[j] += hic.matrix[view_point_start_, idx]
+            if interactions_list is not None:
+                chrom_second, start_second, end_second, _ = hic.getBinPos(idx)
+                interactions_list.append((chrom, start, end, chrom_second, start_second, end_second, hic.matrix[view_point_start_, idx]))
+        view_point_start_ += 1
+
+    return [view_point_start, view_point_end, view_point_range, data_list, interactions_list]
+
+
 def main(args=None):
     args = parse_arguments().parse_args(args)
 
-    hic = hm.hiCMatrix(args.matrix)
-    if args.chromosome:
-        hic.keepOnlyTheseChr(args.chromosome)
     if args.region:
         if sys.version_info[0] == 2:
             args.region = args.region.translate(None, ",.;|!{}()").replace("-", ":")
@@ -74,7 +105,6 @@ def main(args=None):
             log.error("Region format is invalid {}".format(args.region))
             exit(0)
         chrom, region_start, region_end = region[0], int(region[1]), int(region[2])
-
     if sys.version_info[0] == 2:
         args.referencePoint = args.referencePoint.translate(None, ",.;|!{}()").replace("-", ":")
     if sys.version_info[0] == 3:
@@ -84,29 +114,8 @@ def main(args=None):
         args.referencePoint = args.referencePoint.replace("-", ":")
     referencePoint = args.referencePoint.split(":")
 
-    if len(referencePoint) == 2:
-        view_point_start, view_point_end = hic.getRegionBinRange(referencePoint[0], int(referencePoint[1]), int(referencePoint[1]))
-    elif len(referencePoint) == 3:
-        view_point_start, view_point_end = hic.getRegionBinRange(referencePoint[0], int(referencePoint[1]), int(referencePoint[2]))
-    else:
-        log.error("No valid reference point given. {}".format(referencePoint))
-        exit(1)
-
-    view_point_range = hic.getRegionBinRange(chrom, region_start, region_end)
-    elements_of_viewpoint = view_point_range[1] - view_point_range[0]
-    data_list = np.zeros(elements_of_viewpoint)
-    view_point_start_ = view_point_start
-    interactions_list = None
-    if args.interactionOutFileName is not None:
-        interactions_list = []
-    while view_point_start_ <= view_point_end:
-        chrom, start, end, _ = hic.getBinPos(view_point_start_)
-        for j, idx in zip(range(elements_of_viewpoint), range(view_point_range[0], view_point_range[1], 1)):
-            data_list[j] += hic.matrix[view_point_start_, idx]
-            if interactions_list is not None:
-                chrom_second, start_second, end_second, _ = hic.getBinPos(idx)
-                interactions_list.append((chrom, start, end, chrom_second, start_second, end_second, hic.matrix[view_point_start_, idx]))
-        view_point_start_ += 1
+    for matrix in args.matrix:
+        view_point_start, view_point_end, view_point_range, data_list, interactions_list = getViewpointValues(matrix, referencePoint, chrom, region_start, region_end, args.interactionOutFileName, args.chromosome)
 
     fig = plt.figure(figsize=(6.4, 4.8))
     ax = plt.subplot(111)
@@ -144,7 +153,7 @@ def main(args=None):
     bottom, height = .25, .7
     right = left + width
     top = bottom + height
-    ax.text(right, top, os.path.basename(args.matrix),
+    ax.text(right, top, os.path.basename(args.matrix[0]),
             verticalalignment='bottom', horizontalalignment='right',
             transform=ax.transAxes,
             color='black', fontsize=8)
