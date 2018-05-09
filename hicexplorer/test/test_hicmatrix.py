@@ -345,7 +345,7 @@ def test_save_dekker():
     outfile = '/tmp/matrix.gz'
     try:
         _outfile = open(outfile, 'r')
-    except FileNotFoundError:
+    except Exception:
         _outfile = open(outfile, 'w')
     _outfile.close()
 
