@@ -85,8 +85,7 @@ def test_convert_to_zscore_matrix():
     hic.setMatrix(hic.matrix, cut_intervals)
     hic.convert_to_zscore_matrix()
 
-    from numpy.testing import assert_almost_equal
-    assert_almost_equal(hic.matrix.todense(), zscore_mat)
+    nt.assert_almost_equal(hic.matrix.todense(), zscore_mat)
 
 
 def test_convert_to_zscore_matrix_2():
@@ -137,7 +136,7 @@ def test_convert_to_zscore_matrix_2():
     # compare with zscore from class
     hic.convert_to_zscore_matrix(maxdepth=max_depth)
 
-    from numpy.testing import assert_almost_equal
+    # from numpy.testing import assert_almost_equal
     # only the main diagonal is check. Other diagonals show minimal differences
     nt.assert_almost_equal(hic.matrix.todense().diagonal(
         0).A1, zscore_mat.diagonal(0))
