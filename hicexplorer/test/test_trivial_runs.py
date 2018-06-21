@@ -31,6 +31,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__)) + "/test_data/"
 # test_build_matrix
 sam_R1 = ROOT + "small_test_R1_unsorted.bam"
 sam_R2 = ROOT + "small_test_R2_unsorted.bam"
+bam_R1 = ROOT + "R1_1000.bam"
+bam_R2 = ROOT + "R2_1000.bam"
+h5 = ROOT + "R1_R2_1000.h5"
 dpnii_file = ROOT + "DpnII.bed"
 outFile = NamedTemporaryFile(suffix='.h5', delete=False)
 qc_folder = mkdtemp(prefix="testQC_")
@@ -42,12 +45,12 @@ outfile_aggregate_plots = NamedTemporaryFile(suffix='.png', prefix='hicaggregate
 diagnosticHeatmapFile = NamedTemporaryFile(suffix='.png', prefix='hicaggregate_heatmap_', delete=False)
 
 
-@pytest.mark.parametrize("sam1", [sam_R1])  # required
-@pytest.mark.parametrize("sam2", [sam_R2])  # required
+@pytest.mark.parametrize("sam1", [bam_R1])  # required
+@pytest.mark.parametrize("sam2", [bam_R2])  # required
 @pytest.mark.parametrize("outFile", [outFile])  # required
 @pytest.mark.parametrize("qcFolder", [qc_folder])  # required
 @pytest.mark.parametrize("outBam", ['/tmp/test.bam'])
-@pytest.mark.parametrize("binSize", [5000])  # required | restrictionCutFile
+@pytest.mark.parametrize("binSize", [100000])  # required | restrictionCutFile
 @pytest.mark.parametrize("restrictionCutFile", [dpnii_file])  # required | binSize
 @pytest.mark.parametrize("minDistance", [150])
 @pytest.mark.parametrize("maxDistance", [1500])
@@ -83,12 +86,12 @@ def test_build_matrix_bin_size(sam1, sam2, outFile, qcFolder, outBam, binSize,
     hicBuildMatrix.main(args)
 
 
-@pytest.mark.parametrize("sam1", [sam_R1])  # required
-@pytest.mark.parametrize("sam2", [sam_R2])  # required
+@pytest.mark.parametrize("sam1", [bam_R1])  # required
+@pytest.mark.parametrize("sam2", [bam_R2])  # required
 @pytest.mark.parametrize("outFile", [outFile])  # required
 @pytest.mark.parametrize("qcFolder", [qc_folder])  # required
 @pytest.mark.parametrize("outBam", ['/tmp/test.bam'])
-@pytest.mark.parametrize("binSize", [5000])  # required | restrictionCutFile
+@pytest.mark.parametrize("binSize", [100000])  # required | restrictionCutFile
 @pytest.mark.parametrize("restrictionCutFile", [dpnii_file])  # required | binSize
 @pytest.mark.parametrize("minDistance", [150])
 @pytest.mark.parametrize("maxDistance", [1500])

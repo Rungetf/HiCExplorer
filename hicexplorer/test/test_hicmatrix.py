@@ -87,8 +87,7 @@ def test_convert_to_zscore_matrix():
     hic.setMatrix(hic.matrix, cut_intervals)
     hic.convert_to_zscore_matrix()
 
-    from numpy.testing import assert_almost_equal
-    assert_almost_equal(hic.matrix.todense(), zscore_mat)
+    nt.assert_almost_equal(hic.matrix.todense(), zscore_mat)
 
 
 def test_convert_to_zscore_matrix_2():
