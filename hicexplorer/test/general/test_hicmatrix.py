@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore")
 
-ROOT = os.path.dirname(os.path.abspath(__file__)) + "/test_data/"
+ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../test_data/"
 
 
 def test_save_load():
@@ -650,9 +650,11 @@ def test_save_npz():
 def test_save():
     """
     Test will not cover testing of following formats due to unsupported file_formats (see __init__ of class hiCMatrix):
+
     * ren
     * lieberman
     * GInteractions
+
     see also single test for these formats (marked as xfail)
     """
     matrix_h5 = '/tmp/matrix.h5'
@@ -1469,4 +1471,4 @@ def test_intervalListToIntervalTree(capsys):
 
     # test boundaries
     nt.assert_equal(boundaries, OrderedDict([('a', (0, 2)), ('b', (2, 5)), ('c', (5, 7)),
-('d', (7, 8)), ('e', (8, 9))]))
+                                             ('d', (7, 8)), ('e', (8, 9))]))
