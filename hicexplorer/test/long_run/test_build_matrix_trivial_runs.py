@@ -14,6 +14,7 @@ from psutil import virtual_memory
 
 from hicexplorer.utilities import genomicRegion
 from hicexplorer import hicBuildMatrix as hicBuildMatrix
+import hicexplorer.hicAggregateContacts
 
 mem = virtual_memory()
 memory = mem.total / 2**30
@@ -27,7 +28,7 @@ REMOVE_OUTPUT = True
 
 
 # Some definitions needed for tests
-ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../test_data/"
+ROOT = os.path.dirname(os.path.abspath(__file__)) + "/test_data/"
 # test_build_matrix
 sam_R1 = ROOT + "small_test_R1_unsorted.bam"
 sam_R2 = ROOT + "small_test_R2_unsorted.bam"

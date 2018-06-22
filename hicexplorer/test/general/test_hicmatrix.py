@@ -5,6 +5,8 @@ import sys
 from os import unlink
 import warnings
 from six import iteritems
+import pytest
+import logging
 from past.builtins import zip
 from collections import OrderedDict
 from intervaltree import IntervalTree, Interval
@@ -19,7 +21,7 @@ log = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore")
 
-ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../test_data/"
+ROOT = os.path.dirname(os.path.abspath(__file__)) + "/test_data/"
 
 
 def test_save_load():
@@ -136,7 +138,6 @@ def test_convert_to_zscore_matrix_2():
     # compare with zscore from class
     hic.convert_to_zscore_matrix(maxdepth=max_depth)
 
-    # from numpy.testing import assert_almost_equal
     # only the main diagonal is check. Other diagonals show minimal differences
     nt.assert_almost_equal(hic.matrix.todense().diagonal(
         0).A1, zscore_mat.diagonal(0))
