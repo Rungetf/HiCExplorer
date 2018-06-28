@@ -9,7 +9,6 @@ from psutil import virtual_memory
 mem = virtual_memory()
 memory = mem.total / 2 ** 30
 import hicexplorer.hicPlotMatrix
-
 tolerance = 60  # default matplotlib pixed difference tolerance
 ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../test_data/"
 

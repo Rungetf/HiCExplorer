@@ -24,7 +24,7 @@ def are_files_equal(file1, file2):
     return equal
 
 
-def test_build_matrix():
+def test_build_matrix(capsys):
     outfile = NamedTemporaryFile(suffix='.h5', delete=False)
     outfile.close()
     qc_folder = mkdtemp(prefix="testQC_")
