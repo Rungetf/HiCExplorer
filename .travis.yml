@@ -135,3 +135,4 @@ jobs:
       os: osx
       env: TRAVIS_PYTHON_VERSION=3.6
       script: py.test hicexplorer/test/long_run/test_hicAggregateContacts_trivial_runs_three.py
+>>>>>>> testing
