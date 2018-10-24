@@ -4,7 +4,7 @@ from past.builtins import zip
 from scipy.sparse import lil_matrix
 
 from hicexplorer.iterativeCorrection import iterativeCorrection
-from hicexplorer import HiCMatrix as hm
+from hicmatrix import HiCMatrix as hm
 from hicexplorer._version import __version__
 from hicexplorer.utilities import toString
 from hicexplorer.utilities import convertNansToZeros, convertInfsToZeros
@@ -549,7 +549,7 @@ def main(args=None):
 
     # args.chromosomes
     if check_cooler(args.matrix) and args.chromosomes is not None and len(args.chromosomes) == 1:
-        ma = hm.hiCMatrix(args.matrix, chrnameList=toString(args.chromosomes))
+        ma = hm.hiCMatrix(args.matrix, pChrnameList=toString(args.chromosomes))
     else:
         ma = hm.hiCMatrix(args.matrix)
 
