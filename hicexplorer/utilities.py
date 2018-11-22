@@ -232,16 +232,15 @@ def expected_interactions_in_distance(pLength_chromosome, pChromosome_count, pSu
     count_times_i *= np.int(-1)
 
     expected_interactions /= count_times_i
-    log.debug('exp_obs_matrix_lieberman {}'.format(expected_interactions))
+    # log.debug('exp_obs_matrix_lieberman {}'.format(expected_interactions))
 
     return expected_interactions
 
-def expected_interactions_norm(pLength_chromosome, pChromosome_count, pSubmatrix):
+
+def expected_interactions_non_zero(pSubmatrix):
     """
-        Computes the function I_chrom(s) for a given chromosome.
+        Computes the expected number of interactions per distance
     """
-    log.debug('pLength_chromosome {}'.format(pLength_chromosome))
-    log.debug('pChromosome_count {}'.format(pChromosome_count))
 
     expected_interactions = np.zeros(pSubmatrix.shape[0])
     row, col = pSubmatrix.nonzero()
@@ -252,14 +251,44 @@ def expected_interactions_norm(pLength_chromosome, pChromosome_count, pSubmatrix
         expected_interactions[distance_] += pSubmatrix.data[i]
         occurences[distance_] += 1
     expected_interactions /= occurences
+
+    mask = np.isnan(expected_interactions)
+    expected_interactions[mask] = 0
+    mask = np.isinf(expected_interactions)
+    expected_interactions[mask] = 0
+
     return expected_interactions
 
-def exp_obs_matrix_lieberman(pSubmatrix, pLength_chromosome, pChromosome_count):
+
+def expected_interactions(pSubmatrix):
+    """
+        Computes the expected number of interactions per distance
+    """
+
+    expected_interactions = np.zeros(pSubmatrix.shape[0])
+    row, col = pSubmatrix.nonzero()
+    distance = np.absolute(row - col)
+    occurrences = np.arange(pSubmatrix.shape[0] + 1, 1, -1)
+    # occurences = np.zeros(pSubmatrix.shape[0])
+    for i, distance_ in enumerate(distance):
+        expected_interactions[distance_] += pSubmatrix.data[i]
+        # occurences[distance_] += 1
+    expected_interactions /= occurrences
+
+    mask = np.isnan(expected_interactions)
+    expected_interactions[mask] = 0
+    mask = np.isinf(expected_interactions)
+    expected_interactions[mask] = 0
+
+    return expected_interactions
+
+
+def obs_exp_matrix_lieberman(pSubmatrix, pLength_chromosome, pChromosome_count):
     """
         Creates normalized contact matrix M* by
         dividing each entry by the gnome-wide
         expected contacts for loci at
-        that genomic distance
+        that genomic distance. Method: Lieberman-Aiden 2009
     """
 
     expected_interactions_in_distance_ = expected_interactions_in_distance(pLength_chromosome, pChromosome_count, pSubmatrix)
@@ -276,26 +305,81 @@ def exp_obs_matrix_lieberman(pSubmatrix, pLength_chromosome, pChromosome_count):
     return pSubmatrix
 
 
-def exp_obs_matrix_norm(pSubmatrix, pLength_chromosome, pChromosome_count):
+def obs_exp_matrix_norm(pSubmatrix):
     """
         Creates normalized contact matrix M* by
         dividing each entry by the gnome-wide
         expected contacts for loci at
-        that genomic distance
+        that genomic distance. Expected values contain a genomic distance based factor.
+        Method from: Homer Software
+
+        exp_i,j = expected_interactions_distance(abs(i-j)) * sum(row(i)) * sum(row(j)) / sum(matrix)
+        m_i,j = interaction_i,j / exp_i,j
     """
 
-    expected_interactions_in_distance = expected_interactions_norm(pLength_chromosome, pChromosome_count, pSubmatrix)
-    
+    expected_interactions_in_distance = expected_interactions_non_zero(pSubmatrix)
+
     row_sums = np.array(pSubmatrix.sum(axis=1).T).flatten()
     total_interactions = pSubmatrix.sum()
 
     row, col = pSubmatrix.nonzero()
     # data = pSubmatrix.data.tolist()
     for i in range(len(row)):
-        expected = expected_interactions_in_distance[np.absolute(row[i]-col[i])] 
+        expected = expected_interactions_in_distance[np.absolute(row[i] - col[i])]
         expected *= row_sums[row[i]] * row_sums[col[i]] / total_interactions
         pSubmatrix.data[i] /= expected
     return pSubmatrix
+
+
+def obs_exp_matrix_non_zero(pSubmatrix):
+    """
+        Creates normalized contact matrix M* by
+        dividing each entry by the gnome-wide
+        expected contacts for loci at
+        that genomic distance.
+
+        exp_i,j = sum(interactions at distance abs(i-j)) / number of non-zero interactions at abs(i-j)
+
+    """
+
+    expected_interactions_in_distance_ = expected_interactions_non_zero(pSubmatrix)
+    row, col = pSubmatrix.nonzero()
+    distance = np.ceil(np.absolute(row - col) / 2).astype(np.int32)
+
+    if len(pSubmatrix.data) > 0:
+        data_type = type(pSubmatrix.data[0])
+
+        expected = expected_interactions_in_distance_[distance]
+        pSubmatrix.data = pSubmatrix.data.astype(np.float32)
+        pSubmatrix.data /= expected
+        pSubmatrix.data = convertInfsToZeros_ArrayFloat(pSubmatrix.data).astype(data_type)
+    return pSubmatrix
+
+
+def obs_exp_matrix(pSubmatrix):
+    """
+        Creates normalized contact matrix M* by
+        dividing each entry by the gnome-wide
+        expected contacts for loci at
+        that genomic distance.
+
+        exp_i,j = sum(interactions at distance abs(i-j)) / number of non-zero interactions at abs(i-j)
+
+    """
+
+    expected_interactions_in_distance_ = expected_interactions(pSubmatrix)
+    row, col = pSubmatrix.nonzero()
+    distance = np.ceil(np.absolute(row - col) / 2).astype(np.int32)
+
+    if len(pSubmatrix.data) > 0:
+        data_type = type(pSubmatrix.data[0])
+
+        expected = expected_interactions_in_distance_[distance]
+        pSubmatrix.data = pSubmatrix.data.astype(np.float32)
+        pSubmatrix.data /= expected
+        pSubmatrix.data = convertInfsToZeros_ArrayFloat(pSubmatrix.data).astype(data_type)
+    return pSubmatrix
+
 
 def toString(s):
     """
