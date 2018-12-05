@@ -1,12 +1,11 @@
+import warnings
+warnings.simplefilter(action="ignore", category=RuntimeWarning)
+warnings.simplefilter(action="ignore", category=PendingDeprecationWarning)
 import os
 from tempfile import NamedTemporaryFile
 from hicexplorer import hicPlotAverageRegions
-import numpy.testing as nt
 from matplotlib.testing.compare import compare_images
 
-import numpy as np
-import pytest
-from scipy.sparse import load_npz
 import logging
 log = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ def test_average_regions_plot_log():
     args = "--matrix {} -o {} --log".format(matrix, outfile.name).split()
     hicPlotAverageRegions.main(args)
 
-    res = compare_images(ROOT + '/hicPlotAverageRegions/defaults_log.png', outfile.name, tol=40)
+    res = compare_images(ROOT + '/hicPlotAverageRegions/defaults_log.png', outfile.name, tol=50)
     assert res is None, res
     os.remove(outfile.name)
 

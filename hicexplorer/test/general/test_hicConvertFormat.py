@@ -1,24 +1,18 @@
+
+import warnings
+warnings.simplefilter(action="ignore", category=RuntimeWarning)
+warnings.simplefilter(action="ignore", category=PendingDeprecationWarning)
 import os.path
 from tempfile import NamedTemporaryFile
 from hicexplorer import hicConvertFormat
 from hicmatrix import HiCMatrix as hm
 import numpy.testing as nt
 import numpy as np
-import pytest
-from psutil import virtual_memory
-mem = virtual_memory()
-memory = mem.total / 2 ** 30
-
-# memory in GB the test computer needs to have to run the test case
-LOW_MEMORY = 2
-MID_MEMORY = 7
-HIGH_MEMORY = 200
 
 REMOVE_OUTPUT = True
 # DIFF = 60
 
 DELTA_DECIMAL = 0
-
 ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "test_data/hicConvertFormat")
 original_matrix_h5 = ROOT + "/small_test_matrix.h5"
 original_matrix_cool = ROOT + "/small_test_matrix.cool"
@@ -61,7 +55,7 @@ def test_hicConvertFormat_h5_to_cool_enforce_integer():
     outfile = NamedTemporaryFile(suffix='.cool', delete=False)
     outfile.close()
 
-    args = "--matrices {} --outFileName {} --inputFormat h5 --outputFormat cool ".format(original_matrix_cool, outfile.name).split()
+    args = "--matrices {} --outFileName {} --inputFormat h5 --outputFormat cool ".format(original_matrix_h5, outfile.name).split()
     hicConvertFormat.main(args)
 
     test = hm.hiCMatrix(original_matrix_cool)
