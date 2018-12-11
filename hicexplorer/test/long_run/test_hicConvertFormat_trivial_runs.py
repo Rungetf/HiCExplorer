@@ -20,7 +20,7 @@ original_matrix_cool = ROOT + "/small_test_matrix.cool"
 original_matrix_homer = ROOT + "/small_test_matrix.homer"
 
 
-@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  #  , original_matrix_homer, original_matrix_cool, original_matrix_hic])  # required
+@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # required
 @pytest.mark.parametrize("outputFormat", ['cool', 'h5', 'homer', 'ginteractions', 'mcool'])
 @pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_run(
@@ -49,8 +49,8 @@ def test_trivial_run(
     hicConvertFormat.main(args)
 
 
-@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  # required
-@pytest.mark.parametrize("outputFormat", ['h5', 'cool', 'homer', 'ginteractions', 'mcool'])  # , 'h5', 'homer', 'ginteractions', 'mcool'])
+@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # required
+@pytest.mark.parametrize("outputFormat", ['h5', 'cool', 'homer', 'ginteractions', 'mcool'])
 @pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_functionality(
     matrices,
