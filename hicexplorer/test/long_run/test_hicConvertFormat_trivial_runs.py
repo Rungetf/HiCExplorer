@@ -49,13 +49,8 @@ def test_trivial_run(
     hicConvertFormat.main(args)
 
 
-<<<<<<< HEAD
-@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  # required
-@pytest.mark.parametrize("outputFormat", ['h5'])  # , 'cool', 'homer', 'ginteractions', 'mcool'])  # , 'h5', 'homer', 'ginteractions', 'mcool'])
-=======
 @pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # required
 @pytest.mark.parametrize("outputFormat", ['h5', 'cool', 'homer', 'ginteractions', 'mcool'])
->>>>>>> 9f90536d2339a63b5d1169074d41ec318e131a9f
 @pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_functionality(
     matrices,
