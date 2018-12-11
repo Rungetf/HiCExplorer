@@ -50,7 +50,7 @@ def test_trivial_run(
 
 
 @pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  # required
-@pytest.mark.parametrize("outputFormat", ['h5', 'cool', 'homer', 'ginteractions', 'mcool'])  # , 'h5', 'homer', 'ginteractions', 'mcool'])
+@pytest.mark.parametrize("outputFormat", ['h5'])  # , 'cool', 'homer', 'ginteractions', 'mcool'])  # , 'h5', 'homer', 'ginteractions', 'mcool'])
 @pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_functionality(
     matrices,
@@ -77,12 +77,24 @@ def test_trivial_functionality(
 
     hicConvertFormat.main(args)
 
-    test = hm.hiCMatrix(matrices)
+    test = hm.hiCMatrix(matrices + "::/resolutions/5000")
+    test_2 = hm.hiCMatrix(matrices + "::/resolutions/10000")
+    test_3 = hm.hiCMatrix(matrices + "::/resolutions/20000")
 
-    new = hm.hiCMatrix(outFileName.name)
+    new = hm.hiCMatrix(outFileName.name + '::/resolutions/5000')
+    new_2 = hm.hiCMatrix(outFileName.name + '::/resolutions/10000')
+    new_3 = hm.hiCMatrix(outFileName.name + '::/resolutions/20000')
+
+
     nt.assert_array_almost_equal(test.matrix.data, new.matrix.data, decimal=DELTA_DECIMAL)
+    nt.assert_array_almost_equal(test_2.matrix.data, new_2.matrix.data, decimal=DELTA_DECIMAL)
+    nt.assert_array_almost_equal(test_3.matrix.data, new_3.matrix.data, decimal=DELTA_DECIMAL)
+
 
     nt.assert_equal(len(new.cut_intervals), len(test.cut_intervals))
+    nt.assert_equal(len(new_2.cut_intervals), len(test_2.cut_intervals))
+    nt.assert_equal(len(new_3.cut_intervals), len(test_3.cut_intervals))
+
 
     cut_interval_new_ = []
     cut_interval_test_ = []
@@ -92,4 +104,23 @@ def test_trivial_functionality(
         cut_interval_test_.append(x[:3])
 
     nt.assert_equal(cut_interval_new_, cut_interval_test_)
+
+    cut_interval_new_ = []
+    cut_interval_test_ = []
+    for x in new_2.cut_intervals:
+        cut_interval_new_.append(x[:3])
+    for x in test_2.cut_intervals:
+        cut_interval_test_.append(x[:3])
+
+    nt.assert_equal(cut_interval_new_, cut_interval_test_)
+
+    cut_interval_new_ = []
+    cut_interval_test_ = []
+    for x in new_3.cut_intervals:
+        cut_interval_new_.append(x[:3])
+    for x in test_3.cut_intervals:
+        cut_interval_test_.append(x[:3])
+
+    nt.assert_equal(cut_interval_new_, cut_interval_test_)
+
     os.unlink(outFileName.name)
