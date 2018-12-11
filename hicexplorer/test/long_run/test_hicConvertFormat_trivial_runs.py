@@ -56,6 +56,7 @@ def test_trivial_functionality(
     matrices,
     outputFormat,
     resolutions,
+    capsys,
 ):
     """
         Test of functionality of all formats.
@@ -77,50 +78,67 @@ def test_trivial_functionality(
 
     hicConvertFormat.main(args)
 
-    test = hm.hiCMatrix(matrices + "::/resolutions/5000")
-    test_2 = hm.hiCMatrix(matrices + "::/resolutions/10000")
-    test_3 = hm.hiCMatrix(matrices + "::/resolutions/20000")
+    if resolutions != '':
+        test = hm.hiCMatrix(matrices + "::/resolutions/5000")
+        new = hm.hiCMatrix(outFileName.name + '::/resolutions/5000')
 
-    new = hm.hiCMatrix(outFileName.name + '::/resolutions/5000')
-    new_2 = hm.hiCMatrix(outFileName.name + '::/resolutions/10000')
-    new_3 = hm.hiCMatrix(outFileName.name + '::/resolutions/20000')
+        nt.assert_array_almost_equal(test.matrix.data, new.matrix.data, decimal=DELTA_DECIMAL)
+        nt.assert_equal(len(new.cut_intervals), len(test.cut_intervals))
 
+        cut_interval_new_ = []
+        cut_interval_test_ = []
+        for x in new.cut_intervals:
+            cut_interval_new_.append(x[:3])
+        for x in test.cut_intervals:
+            cut_interval_test_.append(x[:3])
+        nt.assert_equal(cut_interval_new_, cut_interval_test_)
 
-    nt.assert_array_almost_equal(test.matrix.data, new.matrix.data, decimal=DELTA_DECIMAL)
-    nt.assert_array_almost_equal(test_2.matrix.data, new_2.matrix.data, decimal=DELTA_DECIMAL)
-    nt.assert_array_almost_equal(test_3.matrix.data, new_3.matrix.data, decimal=DELTA_DECIMAL)
+        if '10000' in resolutions.split():
+            test_2 = hm.hiCMatrix(matrices + "::/resolutions/10000")
+            new_2 = hm.hiCMatrix(outFileName.name + '::/resolutions/10000')
 
+            nt.assert_array_almost_equal(test_2.matrix.data, new_2.matrix.data, decimal=DELTA_DECIMAL)
+            nt.assert_equal(len(new_2.cut_intervals), len(test_2.cut_intervals))
 
-    nt.assert_equal(len(new.cut_intervals), len(test.cut_intervals))
-    nt.assert_equal(len(new_2.cut_intervals), len(test_2.cut_intervals))
-    nt.assert_equal(len(new_3.cut_intervals), len(test_3.cut_intervals))
+            cut_interval_new_ = []
+            cut_interval_test_ = []
+            for x in new_2.cut_intervals:
+                cut_interval_new_.append(x[:3])
+            for x in test_2.cut_intervals:
+                cut_interval_test_.append(x[:3])
 
+            nt.assert_equal(cut_interval_new_, cut_interval_test_)
 
-    cut_interval_new_ = []
-    cut_interval_test_ = []
-    for x in new.cut_intervals:
-        cut_interval_new_.append(x[:3])
-    for x in test.cut_intervals:
-        cut_interval_test_.append(x[:3])
+        if '20000' in resolutions.split():
+            test_3 = hm.hiCMatrix(matrices + "::/resolutions/20000")
+            new_3 = hm.hiCMatrix(outFileName.name + '::/resolutions/20000')
 
-    nt.assert_equal(cut_interval_new_, cut_interval_test_)
+            nt.assert_array_almost_equal(test_3.matrix.data, new_3.matrix.data, decimal=DELTA_DECIMAL)
+            nt.assert_equal(len(new_3.cut_intervals), len(test_3.cut_intervals))
 
-    cut_interval_new_ = []
-    cut_interval_test_ = []
-    for x in new_2.cut_intervals:
-        cut_interval_new_.append(x[:3])
-    for x in test_2.cut_intervals:
-        cut_interval_test_.append(x[:3])
+            cut_interval_new_ = []
+            cut_interval_test_ = []
+            for x in new_3.cut_intervals:
+                cut_interval_new_.append(x[:3])
+            for x in test_3.cut_intervals:
+                cut_interval_test_.append(x[:3])
 
-    nt.assert_equal(cut_interval_new_, cut_interval_test_)
+            nt.assert_equal(cut_interval_new_, cut_interval_test_)
+    else:
+        test = hm.hiCMatrix(matrices)
 
-    cut_interval_new_ = []
-    cut_interval_test_ = []
-    for x in new_3.cut_intervals:
-        cut_interval_new_.append(x[:3])
-    for x in test_3.cut_intervals:
-        cut_interval_test_.append(x[:3])
+        new = hm.hiCMatrix(outFileName.name)
+        nt.assert_array_almost_equal(test.matrix.data, new.matrix.data, decimal=DELTA_DECIMAL)
 
-    nt.assert_equal(cut_interval_new_, cut_interval_test_)
+        nt.assert_equal(len(new.cut_intervals), len(test.cut_intervals))
+
+        cut_interval_new_ = []
+        cut_interval_test_ = []
+        for x in new.cut_intervals:
+            cut_interval_new_.append(x[:3])
+        for x in test.cut_intervals:
+            cut_interval_test_.append(x[:3])
+
+        nt.assert_equal(cut_interval_new_, cut_interval_test_)
 
     os.unlink(outFileName.name)
