@@ -17,11 +17,12 @@ DELTA_DECIMAL = 0
 ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "test_data/hicConvertFormat")
 original_matrix_h5 = ROOT + "/small_test_matrix.h5"
 original_matrix_cool = ROOT + "/small_test_matrix.cool"
+original_matrix_homer = ROOT + "/small_test_matrix.homer"
 
 
-@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool, original_matrix_hic])  # required
+@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  #  , original_matrix_homer, original_matrix_cool, original_matrix_hic])  # required
 @pytest.mark.parametrize("outputFormat", ['cool', 'h5', 'homer', 'ginteractions', 'mcool'])
-@pytest.mark.parametrize("resolutions", [''])  # TODO: check for possible resolutions
+@pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_run(
     matrices,
     outputFormat,
@@ -48,23 +49,22 @@ def test_trivial_run(
     hicConvertFormat.main(args)
 
 
-@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # required
-@pytest.mark.parametrize("outputFormat", ['cool', 'h5'])  # , 'homer', 'ginteractions', 'mcool'])
-@pytest.mark.parametrize("resolutions", [''])  # TODO: Check for resolutions
+@pytest.mark.parametrize("matrices", [original_matrix_h5, original_matrix_cool])  # , original_matrix_cool])  # required
+@pytest.mark.parametrize("outputFormat", ['h5', 'cool', 'homer', 'ginteractions', 'mcool'])  # , 'h5', 'homer', 'ginteractions', 'mcool'])
+@pytest.mark.parametrize("resolutions", ['', '--resolutions 5000', '--resolutions 5000 10000', '--resolutions 5000 10000 20000'])
 def test_trivial_functionality(
     matrices,
     outputFormat,
     resolutions,
 ):
     """
-        Test for all commandline arguments.
-        Options for cool input format are testet seperately.
+        Test of functionality of all formats.
     """
     from pathlib import Path
     # get suffix of input matrix without the dot
     inputFormat = Path(matrices).suffix[1:]
     # create file corresponding to output format
-    outFileName = NamedTemporaryFile(suffix=".{}".format(outputFormat), delete=True)
+    outFileName = NamedTemporaryFile(suffix=".{}".format(outputFormat), delete=False)
     outFileName.close()
 
     args = "--matrices {} --outFileName {} --inputFormat {} --outputFormat {} {}".format(
